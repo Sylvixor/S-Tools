@@ -148,13 +148,21 @@ class Converter {
         this.selectedFiles = this.selectedFiles.filter(id => id !== fileId);
         this.renderFileList();
         this.updateConversionPanel();
+        
+        // Clear the file input so the same file can be uploaded again
+        const fileInput = document.getElementById('fileInput');
+        if (fileInput) {
+            fileInput.value = '';
+        }
+        
         this.updateStatus('FILE REMOVED');
     }
 
     updateConversionPanel() {
         const panel = document.getElementById('conversionPanel');
         
-        if (this.selectedFiles.length === 0) {
+        // Hide panel if no files exist or no files are selected
+        if (this.files.length === 0 || this.selectedFiles.length === 0) {
             panel.style.display = 'none';
             return;
         }
