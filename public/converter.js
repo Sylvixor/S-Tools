@@ -3,6 +3,7 @@ class Converter {
         this.files = [];
         this.selectedFiles = [];
         this.currentFormat = '';
+        this.typewriterTimeout = null;
         this.init();
     }
 
@@ -39,6 +40,14 @@ class Converter {
         // Encode/Decode
         document.getElementById('encodeBtn').addEventListener('click', () => this.encodeText());
         document.getElementById('decodeBtn').addEventListener('click', () => this.decodeText());
+
+        // Encode/Decode method selection
+        document.querySelectorAll('.method-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.method-btn').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+            });
+        });
     }
 
     switchTab(tabName) {
@@ -130,17 +139,35 @@ class Converter {
     toggleFileSelection(fileId) {
         const fileItem = document.querySelector(`[data-id="${fileId}"]`);
         const isSelected = fileItem.classList.contains('selected');
-        
+        const clickedFileData = this.files.find(f => f.id == fileId);
+        if (!clickedFileData) return;
+
+        const clickedFileType = this.getFileBaseType(clickedFileData.type);
+
         if (isSelected) {
             fileItem.classList.remove('selected');
             this.selectedFiles = this.selectedFiles.filter(id => id !== fileId);
         } else {
+            // If the selected file's type is different from the currently selected files, clear the selection.
+            if (this.selectedFiles.length > 0) {
+                const firstSelectedFileData = this.files.find(f => f.id == this.selectedFiles[0]);
+                const firstSelectedFileType = this.getFileBaseType(firstSelectedFileData.type);
+
+                if (clickedFileType !== firstSelectedFileType) {
+                    this.selectedFiles.forEach(id => {
+                        document.querySelector(`[data-id="${id}"]`).classList.remove('selected');
+                    });
+                    this.selectedFiles = [];
+                }
+            }
+
             fileItem.classList.add('selected');
             this.selectedFiles.push(fileId);
         }
 
         this.updateConversionPanel();
-        this.updateStatus(`SELECTED ${this.selectedFiles.length} FILES`);
+        const fileCount = this.selectedFiles.length;
+        this.updateStatus(`SELECTED ${fileCount} FILE${fileCount !== 1 ? 'S' : ''}`);
     }
 
     removeFile(fileId) {
@@ -172,7 +199,7 @@ class Converter {
     }
 
     updateFormatOptions() {
-        const selectedFile = this.files.find(f => f.id === this.selectedFiles[0]);
+        const selectedFile = this.files.find(f => f.id == this.selectedFiles[0]);
         if (!selectedFile) return;
 
         const formatGrid = document.getElementById('formatGrid');
@@ -266,7 +293,7 @@ class Converter {
                 if (targetFormat === 'WEBP') mimeType = 'image/webp';
 
                 canvas.toBlob((blob) => {
-                    this.downloadFile(blob, `${file.name.split('.')[0]}.${targetFormat.toLowerCase()}`);
+                    this.downloadFile(blob, `${file.name.substring(0, file.name.lastIndexOf('.')) || file.name}.${targetFormat.toLowerCase()}`);
                     resolve();
                 }, mimeType, quality);
             };
@@ -302,7 +329,7 @@ class Converter {
     // Encoding/Decoding functions
     async encodeText() {
         const input = document.getElementById('inputText').value;
-        const method = document.getElementById('encodeMethod').value;
+        const method = document.querySelector('.method-btn.active').dataset.value;
         const output = document.getElementById('outputText');
 
         if (!input.trim()) {
@@ -327,9 +354,6 @@ class Converter {
                 case 'sha256':
                     result = await this.hashText(input, 'SHA-256');
                     break;
-                case 'md5':
-                    result = await this.md5Hash(input);
-                    break;
                 case 'url':
                     result = encodeURIComponent(input);
                     break;
@@ -349,7 +373,7 @@ class Converter {
 
     async decodeText() {
         const input = document.getElementById('inputText').value;
-        const method = document.getElementById('encodeMethod').value;
+        const method = document.querySelector('.method-btn.active').dataset.value;
         const output = document.getElementById('outputText');
 
         if (!input.trim()) {
@@ -398,13 +422,16 @@ class Converter {
         return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
     }
 
-    async md5Hash(text) {
-        // Simple MD5 implementation (not cryptographically secure)
-        // In production, use a proper crypto library
-        return await this.hashText(text, 'SHA-256'); // Fallback to SHA-256
-    }
+    
 
     // Utility functions
+    getFileBaseType(fileType) {
+        if (fileType.startsWith('image/')) return 'image';
+        if (fileType.startsWith('video/')) return 'video';
+        if (fileType.startsWith('audio/')) return 'audio';
+        return 'other';
+    }
+
     formatFileSize(bytes) {
         if (bytes === 0) return '0 B';
         const k = 1024;
@@ -416,6 +443,7 @@ class Converter {
     updateStatus(message) {
         const statusEl = document.getElementById('statusText');
         if (statusEl) {
+            clearTimeout(this.typewriterTimeout);
             statusEl.textContent = '';
             
             let i = 0;
@@ -423,7 +451,9 @@ class Converter {
                 if (i < message.length) {
                     statusEl.textContent += message.charAt(i);
                     i++;
-                    setTimeout(typeWriter, 20);
+                    this.typewriterTimeout = setTimeout(typeWriter, 20);
+                } else {
+                    this.typewriterTimeout = null;
                 }
             };
             typeWriter();

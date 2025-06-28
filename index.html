@@ -51,18 +51,17 @@
                 <div class="encode-section">
                     <div class="panel-title">TEXT ENCODER/DECODER</div>
                     <textarea id="inputText" placeholder="INPUT DATA..."></textarea>
-                    <div class="encode-options">
-                        <select id="encodeMethod">
-                            <option value="base64">BASE64</option>
-                            <option value="hex">HEXADECIMAL</option>
-                            <option value="sha1">SHA1 HASH</option>
-                            <option value="sha256">SHA256 HASH</option>
-                            <option value="md5">MD5 HASH</option>
-                            <option value="url">URL ENCODE</option>
-                            <option value="binary">BINARY</option>
-                        </select>
-                        <button id="encodeBtn">ENCODE</button>
-                        <button id="decodeBtn">DECODE</button>
+                    <div class="encode-method-grid" id="encodeMethod">
+                        <button class="method-btn active" data-value="base64">BASE64</button>
+                        <button class="method-btn" data-value="hex">HEX</button>
+                        <button class="method-btn" data-value="sha1">SHA1</button>
+                        <button class="method-btn" data-value="sha256">SHA256</button>
+                        <button class="method-btn" data-value="url">URL</button>
+                        <button class="method-btn" data-value="binary">BINARY</button>
+                    </div>
+                    <div class="encode-actions">
+                        <button id="encodeBtn" class="btn btn-action">ENCODE</button>
+                        <button id="decodeBtn" class="btn btn-action">DECODE</button>
                     </div>
                     <textarea id="outputText" placeholder="OUTPUT WILL APPEAR HERE..." readonly></textarea>
                 </div>

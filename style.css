@@ -207,7 +207,7 @@ body {
 
 .tab:hover {
     color: var(--text-secondary);
-    background: rgba(0, 255, 136, 0.05);
+    background: rgba(255, 255, 255, 0.05);
 }
 
 .tab.active {
@@ -351,12 +351,13 @@ body {
 }
 
 .btn.danger {
-    border-color: var(--text-muted);
-    color: var(--text-muted);
+    border-color: #ff3b30;
+    color: #ff3b30;
 }
 
 .btn.danger:hover {
-    border-color: var(--text-primary);
+    background: #ff3b30;
+    border-color: #ff3b30;
     color: var(--text-primary);
 }
 
@@ -447,15 +448,15 @@ body {
 }
 
 .convert-btn {
-    background: var(--text-primary);
-    color: var(--bg-primary);
-    border: none;
+    background: var(--border-color);
+    border: 1px solid var(--text-muted);
+    color: var(--text-primary);
     padding: 15px 30px;
     border-radius: 6px;
     cursor: pointer;
     font-family: inherit;
     font-size: 1rem;
-    font-weight: 500;
+    font-weight: 700;
     transition: all 0.3s ease;
     text-transform: uppercase;
     letter-spacing: 0.1em;
@@ -464,7 +465,9 @@ body {
 
 .convert-btn:hover {
     background: var(--text-secondary);
-    transform: translateY(-2px);
+    border-color: var(--text-primary);
+    color: var(--bg-primary);
+    box-shadow: 0 0 15px var(--glow-color);
 }
 
 .convert-btn:disabled {
@@ -498,13 +501,6 @@ body {
     border-color: var(--text-primary);
 }
 
-.encode-options {
-    display: flex;
-    gap: 15px;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-}
-
 .encode-options select {
     background: var(--bg-secondary);
     border: 1px solid var(--border-color);
@@ -520,6 +516,66 @@ body {
 .encode-options select:focus {
     outline: none;
     border-color: var(--text-primary);
+}
+
+.encode-method-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.method-btn {
+    background: none;
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    padding: 12px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.8rem;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.method-btn:hover {
+    border-color: var(--text-secondary);
+    color: var(--text-secondary);
+}
+
+.method-btn.active {
+    border-color: var(--text-primary);
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.encode-actions {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.encode-actions .btn {
+    flex: 1;
+    padding: 12px 20px;
+    font-size: 0.9rem;
+}
+
+.btn-action {
+    background: var(--border-color);
+    border: 1px solid var(--text-muted);
+    color: var(--text-primary);
+    font-weight: 700;
+    transition: all 0.3s ease;
+}
+
+.btn-action:hover {
+    background: var(--text-secondary);
+    border-color: var(--text-primary);
+    color: var(--bg-primary);
+    box-shadow: 0 0 15px var(--glow-color);
 }
 
 .pdf-section {
