@@ -23,6 +23,7 @@
         <div class="main-interface">
             <div class="tabs">
                 <button class="tab active" data-tab="files">FILE OPERATIONS</button>
+                <button class="tab" data-tab="converter">CONVERTER</button>
                 <button class="tab" data-tab="encode">ENCODE/DECODE</button>
                 <button class="tab" data-tab="colors">COLORS</button>
             </div>
@@ -45,6 +46,33 @@
                         <input type="range" id="qualitySlider" min="10" max="100" value="80">
                     </div>
                     <button class="convert-btn" id="convertBtn">EXECUTE CONVERSION</button>
+                </div>
+            </div>
+
+            <div class="tab-content" id="converter">
+                <div class="converter-section">
+                    <div class="panel-title">UNIT CONVERTER</div>
+                    <div class="converter-category-select">
+                        <label for="converterCategory">CATEGORY:</label>
+                        <select id="converterCategory">
+                            <option value="time">Time</option>
+                            <option value="length">Length</option>
+                            <option value="weight">Weight</option>
+                            <option value="temperature">Temperature</option>
+                            <option value="currency">Currency</option>
+                        </select>
+                    </div>
+                    <div class="converter-grid">
+                        <div class="converter-input-group">
+                            <input type="number" id="converterInput" placeholder="Enter value">
+                            <select id="converterFromUnit"></select>
+                        </div>
+                        <div class="converter-output-group">
+                            <input type="text" id="converterOutput" readonly placeholder="Result">
+                            <select id="converterToUnit"></select>
+                        </div>
+                        <button id="convertUnitBtn" class="btn btn-action">CONVERT</button>
+                    </div>
                 </div>
             </div>
 

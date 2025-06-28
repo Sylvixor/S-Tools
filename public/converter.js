@@ -9,7 +9,7 @@ class Converter {
 
     init() {
         this.setupEventListeners();
-        this.updateStatus('SYSTEM: READY');
+        this.setupConverter(); // Initialize converter units on load
     }
 
     setupEventListeners() {
@@ -24,6 +24,8 @@ class Converter {
                     if (colorPicker) {
                         this.handleColorChange(colorPicker.value);
                     }
+                } else if (clickedTab === 'converter') {
+                    this.setupConverter();
                 } else {
                     const paletteContainer = document.getElementById('paletteContainer');
                     if (paletteContainer) {
@@ -97,32 +99,210 @@ class Converter {
                 e.target.classList.add('active');
             });
         });
+
+        document.getElementById('convertUnitBtn').addEventListener('click', () => this.convertUnits());
+
+        // Add event listeners for unit selection changes
+        document.getElementById('converterFromUnit').addEventListener('change', () => this.convertUnits());
+        document.getElementById('converterToUnit').addEventListener('change', () => this.convertUnits());
+        document.getElementById('converterInput').addEventListener('input', () => this.convertUnits());
+
+        // Converter category selection
+        document.getElementById('converterCategory').addEventListener('change', (e) => {
+            this.populateUnitSelects(e.target.value);
+            this.convertUnits(); // Re-convert after category change
+        });
+    }
+
+    setupConverter() {
+        const fromUnitSelect = document.getElementById('converterFromUnit');
+        const toUnitSelect = document.getElementById('converterToUnit');
+
+        // Clear previous options
+        fromUnitSelect.innerHTML = '';
+        toUnitSelect.innerHTML = '';
+
+        // Define units and their conversion factors relative to a base unit
+        this.units = {
+            time: {
+                base: 'seconds',
+                conversions: {
+                    milliseconds: 0.001,
+                    seconds: 1,
+                    minutes: 60,
+                    hours: 3600,
+                    days: 86400,
+                    weeks: 604800,
+                    months: 2629746, // Average month
+                    years: 31556952 // Average year
+                }
+            },
+            length: {
+                base: 'meters',
+                conversions: {
+                    nanometers: 1e-9,
+                    micrometers: 1e-6,
+                    millimeters: 0.001,
+                    centimeters: 0.01,
+                    meters: 1,
+                    kilometers: 1000,
+                    inches: 0.0254,
+                    feet: 0.3048,
+                    yards: 0.9144,
+                    miles: 1609.34
+                }
+            },
+            weight: {
+                base: 'grams',
+                conversions: {
+                    milligrams: 0.001,
+                    grams: 1,
+                    kilograms: 1000,
+                    ounces: 28.3495,
+                    pounds: 453.592,
+                    tonnes: 1e6
+                }
+            },
+            temperature: {
+                base: 'celsius',
+                conversions: {
+                    celsius: { toBase: (val) => val, fromBase: (val) => val },
+                    fahrenheit: { toBase: (val) => (val - 32) * 5/9, fromBase: (val) => (val * 9/5) + 32 },
+                    kelvin: { toBase: (val) => val - 273.15, fromBase: (val) => val + 273.15 }
+                }
+            },
+            currency: {
+                base: 'USD',
+                conversions: {
+                    // Placeholder: Real currency conversion requires an external API
+                    USD: 1,
+                    EUR: 0.92, // Example rate
+                    GBP: 0.79, // Example rate
+                    JPY: 158.20 // Example rate
+                }
+            }
+        };
+
+        // Default to time conversion
+        this.populateUnitSelects('time');
+    }
+
+    populateUnitSelects(category) {
+        const fromUnitSelect = document.getElementById('converterFromUnit');
+        const toUnitSelect = document.getElementById('converterToUnit');
+        const units = this.units[category].conversions;
+
+        fromUnitSelect.innerHTML = '';
+        toUnitSelect.innerHTML = '';
+
+        for (const unit in units) {
+            const optionFrom = document.createElement('option');
+            optionFrom.value = unit;
+            optionFrom.textContent = unit.charAt(0).toUpperCase() + unit.slice(1);
+            fromUnitSelect.appendChild(optionFrom);
+
+            const optionTo = document.createElement('option');
+            optionTo.value = unit;
+            optionTo.textContent = unit.charAt(0).toUpperCase() + unit.slice(1);
+            toUnitSelect.appendChild(optionTo);
+        }
+
+        // Set default selections
+        fromUnitSelect.value = Object.keys(units)[0];
+        toUnitSelect.value = Object.keys(units)[1];
+    }
+
+    convertUnits() {
+        const inputValue = parseFloat(document.getElementById('converterInput').value);
+        const fromUnit = document.getElementById('converterFromUnit').value;
+        const toUnit = document.getElementById('converterToUnit').value;
+        const outputField = document.getElementById('converterOutput');
+
+        if (isNaN(inputValue) || document.getElementById('converterInput').value.trim() === '') {
+            outputField.value = ''; // Clear the output if input is empty or invalid
+            // Do not update status for empty input
+            if (document.getElementById('converterInput').value.trim() !== '') {
+                this.updateStatus('CONVERTER: ERROR: INVALID INPUT');
+            }
+            return;
+        }
+
+        let result;
+        let category;
+
+        // Determine category based on fromUnit
+        for (const cat in this.units) {
+            if (this.units[cat].conversions[fromUnit]) {
+                category = cat;
+                break;
+            }
+        }
+
+        if (!category) {
+            outputField.value = 'Error';
+            this.updateStatus('CONVERTER: ERROR: UNKNOWN UNIT');
+            return;
+        }
+
+        const unitData = this.units[category].conversions;
+        const baseUnit = this.units[category].base;
+
+        if (category === 'temperature') {
+            // Temperature conversion is special (not linear)
+            const toBaseFunc = unitData[fromUnit].toBase;
+            const fromBaseFunc = unitData[toUnit].fromBase;
+
+            const valueInBase = toBaseFunc(inputValue);
+            result = fromBaseFunc(valueInBase);
+        } else {
+            // Convert input to base unit
+            const valueInBase = inputValue * unitData[fromUnit];
+            // Convert from base unit to target unit
+            result = valueInBase / unitData[toUnit];
+        }
+
+        outputField.value = result.toFixed(4); // Display with 4 decimal places
+        this.updateStatus(`CONVERTER: CONVERTED ${inputValue} ${fromUnit.toUpperCase()} TO ${result.toFixed(4)} ${toUnit.toUpperCase()}`);
     }
 
     switchTab(tabName) {
+        const currentActiveTabContent = document.querySelector('.tab-content.active');
+        const newTabContent = document.getElementById(tabName);
+
         // Update tab buttons
         document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
         document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
 
-        // Update content
-        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-        document.getElementById(tabName).classList.add('active');
+        if (currentActiveTabContent) {
+            currentActiveTabContent.classList.add('slide-out');
+            currentActiveTabContent.addEventListener('animationend', () => {
+                currentActiveTabContent.classList.remove('active', 'slide-out');
+                newTabContent.classList.add('active');
+                // Handle palette visibility for the new tab
+                this.handleTabContentVisibility(tabName);
+            }, { once: true });
+        } else {
+            newTabContent.classList.add('active');
+            this.handleTabContentVisibility(tabName);
+        }
 
-        // Handle palette visibility
+        this.updateStatus(`TAB: SWITCHED TO ${tabName.toUpperCase()}`);
+    }
+
+    handleTabContentVisibility(tabName) {
         const paletteContainer = document.getElementById('paletteContainer');
         if (tabName === 'colors') {
             paletteContainer.style.display = 'block';
-            // Re-generate palette if needed (e.g., on first load or if color changed while on another tab)
             const colorPicker = document.getElementById('colorPicker');
             if (colorPicker) {
                 this.handleColorChange(colorPicker.value);
             }
+        } else if (tabName === 'converter') {
+            this.setupConverter();
         } else {
             paletteContainer.style.display = 'none';
-            paletteContainer.innerHTML = ''; // Clear content when hidden
+            paletteContainer.innerHTML = '';
         }
-
-        this.updateStatus(`TAB: SWITCHED TO ${tabName.toUpperCase()}`);
     }
 
     handleDragOver(e) {
