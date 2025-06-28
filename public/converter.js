@@ -9,13 +9,29 @@ class Converter {
 
     init() {
         this.setupEventListeners();
-        this.updateStatus('SYSTEM READY');
+        this.updateStatus('SYSTEM: READY');
     }
 
     setupEventListeners() {
         // Tab switching
         document.querySelectorAll('.tab').forEach(tab => {
-            tab.addEventListener('click', (e) => this.switchTab(e.target.dataset.tab));
+            tab.addEventListener('click', (e) => {
+                const clickedTab = e.target.dataset.tab;
+                
+                this.switchTab(clickedTab);
+                if (clickedTab === 'colors') {
+                    const colorPicker = document.getElementById('colorPicker');
+                    if (colorPicker) {
+                        this.handleColorChange(colorPicker.value);
+                    }
+                } else {
+                    const paletteContainer = document.getElementById('paletteContainer');
+                    if (paletteContainer) {
+                        paletteContainer.style.display = 'none';
+                        
+                    }
+                }
+            });
         });
 
         // File upload
@@ -41,6 +57,39 @@ class Converter {
         document.getElementById('encodeBtn').addEventListener('click', () => this.encodeText());
         document.getElementById('decodeBtn').addEventListener('click', () => this.decodeText());
 
+        // Color Picker
+        const colorPicker = document.getElementById('colorPicker');
+        const customColorPicker = document.getElementById('customColorPicker');
+
+        if (colorPicker && customColorPicker) {
+            // When the custom div is clicked, open the native color picker
+            customColorPicker.addEventListener('click', () => {
+                console.log('Custom color picker clicked!');
+                colorPicker.click();
+            });
+
+            // When the native color picker's value changes, update the custom div and values
+            colorPicker.addEventListener('input', (e) => {
+                this.handleColorChange(e.target.value);
+            });
+        }
+
+        document.querySelectorAll('.copy-icon-btn').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const targetId = e.currentTarget.dataset.target;
+                const textToCopy = document.getElementById(targetId).value;
+                this.copyToClipboard(textToCopy);
+            });
+        });
+
+        document.querySelectorAll('.copy-textarea-btn').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const targetId = e.currentTarget.dataset.target;
+                const textToCopy = document.getElementById(targetId).value;
+                this.copyToClipboard(textToCopy);
+            });
+        });
+
         // Encode/Decode method selection
         document.querySelectorAll('.method-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
@@ -59,7 +108,21 @@ class Converter {
         document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
         document.getElementById(tabName).classList.add('active');
 
-        this.updateStatus(`SWITCHED TO ${tabName.toUpperCase()} MODULE`);
+        // Handle palette visibility
+        const paletteContainer = document.getElementById('paletteContainer');
+        if (tabName === 'colors') {
+            paletteContainer.style.display = 'block';
+            // Re-generate palette if needed (e.g., on first load or if color changed while on another tab)
+            const colorPicker = document.getElementById('colorPicker');
+            if (colorPicker) {
+                this.handleColorChange(colorPicker.value);
+            }
+        } else {
+            paletteContainer.style.display = 'none';
+            paletteContainer.innerHTML = ''; // Clear content when hidden
+        }
+
+        this.updateStatus(`TAB: SWITCHED TO ${tabName.toUpperCase()}`);
     }
 
     handleDragOver(e) {
@@ -85,7 +148,7 @@ class Converter {
     }
 
     processFiles(files) {
-        this.updateStatus('PROCESSING FILES...');
+        this.updateStatus('FILE: PROCESSING FILES...');
         
         files.forEach(file => {
             const fileData = {
@@ -100,7 +163,7 @@ class Converter {
         });
 
         this.renderFileList();
-        this.updateStatus(`LOADED ${files.length} FILES`);
+        this.updateStatus(`FILE: LOADED ${files.length} FILES`);
     }
 
     renderFileList() {
@@ -167,7 +230,7 @@ class Converter {
 
         this.updateConversionPanel();
         const fileCount = this.selectedFiles.length;
-        this.updateStatus(`SELECTED ${fileCount} FILE${fileCount !== 1 ? 'S' : ''}`);
+        this.updateStatus(`FILE: SELECTED ${fileCount} FILE${fileCount !== 1 ? 'S' : ''}`);
     }
 
     removeFile(fileId) {
@@ -182,7 +245,7 @@ class Converter {
             fileInput.value = '';
         }
         
-        this.updateStatus('FILE REMOVED');
+        this.updateStatus('FILE: REMOVED');
     }
 
     updateConversionPanel() {
@@ -231,7 +294,7 @@ class Converter {
         document.querySelectorAll('.format-btn').forEach(btn => btn.classList.remove('selected'));
         event.target.classList.add('selected');
         this.currentFormat = format;
-        this.updateStatus(`FORMAT SELECTED: ${format}`);
+        this.updateStatus(`FORMAT: SELECTED ${format}`);
     }
 
     async convertFiles() {
@@ -240,7 +303,7 @@ class Converter {
             return;
         }
 
-        this.updateStatus('CONVERTING FILES...');
+        this.updateStatus('CONVERSION: IN PROGRESS...');
         this.showProgress(true);
 
         for (let i = 0; i < this.selectedFiles.length; i++) {
@@ -253,14 +316,14 @@ class Converter {
                 this.updateProgress((i / this.selectedFiles.length) * 100);
                 await this.convertSingleFile(fileData, this.currentFormat);
             } catch (error) {
-                console.error('Conversion error:', error);
-                this.updateStatus(`ERROR CONVERTING: ${fileData.name}`);
+                console.error('ERROR: CONVERSION: ', error);
+                this.updateStatus(`ERROR: CONVERTING ${fileData.name}`);
             }
         }
 
         this.updateProgress(100);
         setTimeout(() => this.showProgress(false), 1000);
-        this.updateStatus('CONVERSION COMPLETE');
+        this.updateStatus('CONVERSION: COMPLETE');
     }
 
     async convertSingleFile(fileData, targetFormat) {
@@ -305,13 +368,13 @@ class Converter {
     async convertVideo(file, targetFormat, quality) {
         // Note: True video conversion requires FFmpeg or similar
         // This is a simplified implementation for demonstration
-        this.updateStatus('VIDEO CONVERSION REQUIRES EXTERNAL LIBRARIES');
+        this.updateStatus('CONVERSION: VIDEO REQUIRES EXTERNAL LIBRARIES');
         return Promise.resolve();
     }
 
     async convertAudio(file, targetFormat) {
         // Note: Audio conversion also requires specialized libraries
-        this.updateStatus('AUDIO CONVERSION REQUIRES EXTERNAL LIBRARIES');
+        this.updateStatus('CONVERSION: AUDIO REQUIRES EXTERNAL LIBRARIES');
         return Promise.resolve();
     }
 
@@ -333,7 +396,7 @@ class Converter {
         const output = document.getElementById('outputText');
 
         if (!input.trim()) {
-            this.updateStatus('ERROR: NO INPUT TEXT');
+            this.updateStatus('ENCODE/DECODE: ERROR: NO INPUT TEXT');
             return;
         }
 
@@ -364,10 +427,10 @@ class Converter {
             }
 
             output.value = result;
-            this.updateStatus(`ENCODED USING ${method.toUpperCase()}`);
+            this.updateStatus(`ENCODE/DECODE: ENCODED USING ${method.toUpperCase()}`);
         } catch (error) {
-            this.updateStatus('ENCODING ERROR');
-            console.error(error);
+            this.updateStatus('ENCODE/DECODE: ENCODING ERROR');
+            console.error('ERROR: ENCODE/DECODE: Operation failed.', error);
         }
     }
 
@@ -377,7 +440,7 @@ class Converter {
         const output = document.getElementById('outputText');
 
         if (!input.trim()) {
-            this.updateStatus('ERROR: NO INPUT TEXT');
+            this.updateStatus('ENCODE/DECODE: ERROR: NO INPUT TEXT');
             return;
         }
 
@@ -402,15 +465,15 @@ class Converter {
                     result = new TextDecoder().decode(new Uint8Array(binaryBytes));
                     break;
                 default:
-                    this.updateStatus('CANNOT DECODE HASH FUNCTIONS');
+                    this.updateStatus('ENCODE/DECODE: CANNOT DECODE HASH FUNCTIONS');
                     return;
             }
 
             output.value = result;
-            this.updateStatus(`DECODED USING ${method.toUpperCase()}`);
+            this.updateStatus(`ENCODE/DECODE: DECODED USING ${method.toUpperCase()}`);
         } catch (error) {
-            this.updateStatus('DECODING ERROR');
-            console.error(error);
+            this.updateStatus('ENCODE/DECODE: DECODING ERROR');
+            console.error('ERROR: ENCODE/DECODE: Operation failed.', error);
         }
     }
 
@@ -422,7 +485,194 @@ class Converter {
         return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
     }
 
-    
+    handleColorChange(hex) {
+        const rgb = this.hexToRgb(hex);
+        const hsl = this.rgbToHsl(rgb.r, rgb.g, rgb.b);
+
+        document.getElementById('hexValue').value = hex.toUpperCase();
+        document.getElementById('rgbValue').value = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+        document.getElementById('hslValue').value = `hsl(${hsl.h.toFixed(0)}, ${hsl.s.toFixed(0)}%, ${hsl.l.toFixed(0)}%)`;
+
+        // Update the custom color picker's background
+        document.getElementById('customColorPicker').style.backgroundColor = hex;
+
+        // Only generate palette if the colors tab is active
+        if (document.querySelector('.tab[data-tab="colors"]').classList.contains('active')) {
+            this.generatePalette(hsl);
+        }
+    }
+
+    hexToRgb(hex) {
+        const r = parseInt(hex.substring(1, 3), 16);
+        const g = parseInt(hex.substring(3, 5), 16);
+        const b = parseInt(hex.substring(5, 7), 16);
+        return { r, g, b };
+    }
+
+    rgbToHsl(r, g, b) {
+        r /= 255;
+        g /= 255;
+        b /= 255;
+
+        const max = Math.max(r, g, b);
+        const min = Math.min(r, g, b);
+        let h, s, l = (max + min) / 2;
+
+        if (max === min) {
+            h = s = 0; // achromatic
+        } else {
+            const d = max - min;
+            s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+            switch (max) {
+                case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+                case g: h = (b - r) / d + 2; break;
+                case b: h = (r - g) / d + 4; break;
+            }
+            h /= 6;
+        }
+
+        return { h: h * 360, s: s * 100, l: l * 100 };
+    }
+
+    hslToRgb(h, s, l) {
+        h /= 360;
+        s /= 100;
+        l /= 100;
+
+        let r, g, b;
+
+        if (s === 0) {
+            r = g = b = l; // achromatic
+        } else {
+            const hue2rgb = (p, q, t) => {
+                if (t < 0) t += 1;
+                if (t > 1) t -= 1;
+                if (t < 1 / 6) return p + (q - p) * 6 * t;
+                if (t < 1 / 2) return q;
+                if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+                return p;
+            };
+
+            const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+            const p = 2 * l - q;
+            r = hue2rgb(p, q, h + 1 / 3);
+            g = hue2rgb(p, q, h);
+            b = hue2rgb(p, q, h - 1 / 3);
+        }
+
+        return { r: Math.round(r * 255), g: Math.round(g * 255), b: Math.round(b * 255) };
+    }
+
+    rgbToHex(r, g, b) {
+        return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+    }
+
+    generatePalette(baseHsl) {
+        const paletteContainer = document.getElementById('paletteContainer');
+        paletteContainer.innerHTML = '';
+
+        const palettes = {
+            'Monochromatic': this.generateMonochromaticPalette(baseHsl),
+            'Analogous': this.generateAnalogousPalette(baseHsl),
+            'Complementary': this.generateComplementaryPalette(baseHsl),
+            'Triadic': this.generateTriadicPalette(baseHsl),
+            'Tetradic': this.generateTetradicPalette(baseHsl)
+        };
+
+        for (const paletteName in palettes) {
+            const paletteColors = palettes[paletteName];
+            const paletteSection = document.createElement('div');
+            paletteSection.className = 'palette-section';
+            paletteSection.innerHTML = `<div class="panel-title">${paletteName}</div>`;
+
+            const colorContainer = document.createElement('div');
+            colorContainer.className = 'palette-grid';
+
+            paletteColors.forEach(hsl => {
+                const rgb = this.hslToRgb(hsl.h, hsl.s, hsl.l);
+                const hex = this.rgbToHex(rgb.r, rgb.g, rgb.b);
+                const paletteColorDiv = document.createElement('div');
+                paletteColorDiv.className = 'palette-color';
+                paletteColorDiv.style.backgroundColor = hex;
+                paletteColorDiv.textContent = hex.toUpperCase();
+                paletteColorDiv.title = `HEX: ${hex.toUpperCase()}\nRGB: rgb(${rgb.r}, ${rgb.g}, ${rgb.b})\nHSL: hsl(${hsl.h.toFixed(0)}, ${hsl.s.toFixed(0)}%, ${hsl.l.toFixed(0)}%)`;
+                paletteColorDiv.addEventListener('click', () => {
+                    navigator.clipboard.writeText(hex.toUpperCase());
+                    this.updateStatus(`COPIED ${hex.toUpperCase()} TO CLIPBOARD`);
+                });
+                colorContainer.appendChild(paletteColorDiv);
+            });
+            paletteSection.appendChild(colorContainer);
+            paletteContainer.appendChild(paletteSection);
+        }
+    }
+
+    generateMonochromaticPalette(baseHsl) {
+        const colors = [];
+        // Generate 5 monochromatic colors with variations in lightness and saturation
+        for (let i = 0; i < 5; i++) {
+            const l = Math.max(0, Math.min(100, baseHsl.l + (i - 2) * 15)); // Vary lightness
+            const s = Math.max(0, Math.min(100, baseHsl.s + (i - 2) * 5));  // Vary saturation slightly
+            colors.push({ h: baseHsl.h, s: s, l: l });
+        }
+        return colors;
+    }
+
+    generateAnalogousPalette(baseHsl) {
+        const colors = [];
+        colors.push(baseHsl); // Base color
+        // Analogous colors with slight variations in lightness and saturation
+        colors.push({ h: (baseHsl.h + 30) % 360, s: Math.max(0, baseHsl.s - 10), l: Math.max(0, baseHsl.l - 10) });
+        colors.push({ h: (baseHsl.h - 30 + 360) % 360, s: Math.min(100, baseHsl.s + 10), l: Math.min(100, baseHsl.l + 10) });
+        colors.push({ h: (baseHsl.h + 60) % 360, s: Math.max(0, baseHsl.s - 5), l: Math.min(100, baseHsl.l + 5) });
+        colors.push({ h: (baseHsl.h - 60 + 360) % 360, s: Math.min(100, baseHsl.s + 5), l: Math.max(0, baseHsl.l - 5) });
+        return colors;
+    }
+
+    generateComplementaryPalette(baseHsl) {
+        const colors = [];
+        colors.push(baseHsl); // Base color
+        const complementaryHue = (baseHsl.h + 180) % 360;
+
+        // Complementary color with slight variations
+        colors.push({ h: complementaryHue, s: baseHsl.s, l: baseHsl.l });
+        colors.push({ h: baseHsl.h, s: Math.max(0, baseHsl.s - 15), l: Math.min(100, baseHsl.l + 15) });
+        colors.push({ h: complementaryHue, s: Math.min(100, baseHsl.s + 15), l: Math.max(0, baseHsl.l - 15) });
+        colors.push({ h: baseHsl.h, s: baseHsl.s, l: Math.max(0, baseHsl.l - 10) });
+        return colors;
+    }
+
+    generateTriadicPalette(baseHsl) {
+        const colors = [];
+        colors.push(baseHsl); // Base color
+        // Triadic colors with variations
+        colors.push({ h: (baseHsl.h + 120) % 360, s: Math.max(0, baseHsl.s - 10), l: Math.min(100, baseHsl.l + 10) });
+        colors.push({ h: (baseHsl.h + 240) % 360, s: Math.min(100, baseHsl.s + 10), l: Math.max(0, baseHsl.l - 10) });
+        colors.push({ h: (baseHsl.h + 60) % 360, s: baseHsl.s, l: baseHsl.l }); // Additional color for richness
+        colors.push({ h: (baseHsl.h - 60 + 360) % 360, s: baseHsl.s, l: baseHsl.l }); // Additional color for richness
+        return colors;
+    }
+
+    generateTetradicPalette(baseHsl) {
+        const colors = [];
+        colors.push(baseHsl); // Base color
+        // Tetradic colors with variations
+        colors.push({ h: (baseHsl.h + 90) % 360, s: Math.max(0, baseHsl.s - 10), l: Math.min(100, baseHsl.l + 10) });
+        colors.push({ h: (baseHsl.h + 180) % 360, s: baseHsl.s, l: baseHsl.l });
+        colors.push({ h: (baseHsl.h + 270) % 360, s: Math.min(100, baseHsl.s + 10), l: Math.max(0, baseHsl.l - 10) });
+        colors.push({ h: baseHsl.h, s: Math.max(0, baseHsl.s - 5), l: Math.min(100, baseHsl.l + 5) }); // Additional variation
+        return colors;
+    }
+
+    async copyToClipboard(text) {
+        try {
+            await navigator.clipboard.writeText(text);
+            this.updateStatus(`CLIPBOARD: COPIED "${text}"`);
+        } catch (err) {
+            console.error('ERROR: CLIPBOARD: Failed to copy.', err);
+            this.updateStatus('CLIPBOARD: FAILED TO COPY');
+        }
+    }
 
     // Utility functions
     getFileBaseType(fileType) {
@@ -459,7 +709,7 @@ class Converter {
             typeWriter();
         }
         
-        console.log(`[CONVERTER] ${message}`);
+        console.log(`INFO: ${message}`);
     }
 
     showProgress(show) {

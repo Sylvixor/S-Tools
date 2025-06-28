@@ -92,7 +92,7 @@ body {
 .container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 20px 20px 80px 20px; /* Added padding to the bottom */
     position: relative;
     z-index: 10;
 }
@@ -372,9 +372,13 @@ body {
 .panel-title {
     font-size: 1.1rem;
     font-weight: 500;
-    margin-bottom: 20px;
+    margin-bottom: 10px; /* Reduced margin for tighter spacing */
     text-transform: uppercase;
     letter-spacing: 0.1em;
+}
+
+.color-tools .panel-title {
+    margin-bottom: 0px; /* Specific adjustment for color utilities title */
 }
 
 .format-grid {
@@ -482,7 +486,12 @@ body {
     margin: 0 auto;
 }
 
-.encode-section textarea {
+.textarea-container {
+    position: relative;
+    margin-bottom: 20px; /* Adjust as needed */
+}
+
+.textarea-container textarea {
     width: 100%;
     background: var(--bg-secondary);
     border: 1px solid var(--border-color);
@@ -493,12 +502,34 @@ body {
     font-size: 0.9rem;
     resize: vertical;
     min-height: 150px;
-    margin-bottom: 20px;
+    padding-right: 40px; /* Make space for the copy button */
 }
 
-.encode-section textarea:focus {
+.textarea-container textarea:focus {
     outline: none;
     border-color: var(--text-primary);
+}
+
+.copy-textarea-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    cursor: pointer;
+    width: 30px; /* Square button */
+    height: 30px; /* Square button */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 4px;
+    transition: color 0.2s ease;
+    z-index: 1; /* Ensure it's above the textarea */
+}
+
+.copy-textarea-btn:hover {
+    color: var(--accent-color);
 }
 
 .encode-options select {
@@ -561,6 +592,169 @@ body {
     flex: 1;
     padding: 12px 20px;
     font-size: 0.9rem;
+}
+
+.color-tools {
+    max-width: 800px; /* Increased max-width for the new layout */
+    margin: 0 auto;
+    display: flex; /* Use flexbox for main layout */
+    flex-direction: column; /* Stack elements vertically */
+    gap: 20px; /* Space between sections */
+}
+
+.color-main-section {
+    display: flex; /* Arrange color picker and values side-by-side */
+    flex-direction: column; /* Stack elements vertically */
+    gap: 20px; /* Increased space between sections */
+    margin-top: -5px; /* Reduce space above the color picker box */
+    /* Removed background, border, border-radius, and padding */
+}
+
+.color-picker-wrapper {
+    width: 100%; /* Take full width */
+    height: 200px; /* Set a fixed height for the color picker area */
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    overflow: hidden; /* Hide overflow from the input */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: var(--bg-secondary);
+    position: relative; /* Needed for absolute positioning of child */
+}
+
+.custom-color-picker {
+    width: 100%;
+    height: 100%;
+    border-radius: 10px; /* Consistent with wrapper */
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#colorPicker {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 1; /* Ensure it's on top to receive clicks */
+}
+
+.color-values-container {
+    flex-shrink: 0; /* Prevent container from shrinking */
+    width: 100%; /* Take full width within color-main-section */
+    display: flex; /* Arrange labels and inputs horizontally */
+    flex-direction: column; /* Stack color values vertically */
+    gap: 10px;
+    margin-bottom: 0; /* Remove previous margin */
+    background: none; /* Remove previous background */
+    border: none; /* Remove previous border */
+    border-radius: 0; /* Remove previous border-radius */
+    padding: 0; /* Remove previous padding */
+}
+
+.color-value {
+    display: flex;
+    align-items: center;
+    padding: 0;
+}
+
+.color-value label {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    width: 40px; /* Adjust label width */
+    flex-shrink: 0;
+    margin-right: 10px; /* Space between label and input/button group */
+}
+
+.color-input-group {
+    display: flex;
+    flex-grow: 1;
+}
+
+.color-input-box {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 4px; /* Full rounded corners */
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 0.9rem;
+    padding: 8px 12px;
+    flex-grow: 1;
+    outline: none;
+    height: 40px; /* Ensure consistent height with button */
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+}
+
+.copy-icon-btn {
+    background: var(--border-color);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    cursor: pointer;
+    width: 40px; /* Make it square */
+    height: 40px; /* Make it square */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 4px; /* Full rounded corners */
+    transition: background 0.2s ease;
+    margin-left: 10px; /* Add space between input and button */
+}
+
+.copy-icon-btn:hover {
+    background: var(--text-secondary);
+    color: var(--bg-primary);
+}
+
+.copy-icon {
+    width: 18px;
+    height: 18px;
+    vertical-align: middle;
+}
+
+
+
+.palette-container {
+    margin-top: 30px;
+    padding: 0;
+    display: none; /* Hidden by default */
+}
+
+.palette-section {
+    margin-bottom: 30px;
+    padding: 0;
+}
+
+.palette-section .panel-title {
+    margin-top: 0;
+    margin-bottom: 15px;
+}
+
+.palette-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); /* Adjust grid for more colors */
+    gap: 15px;
+}
+
+.palette-color {
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    height: 100px; /* Fixed height for palette colors */
+    display: flex;
+    align-items: flex-end;
+    padding: 10px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    color: var(--text-primary);
+}
+
+.palette-color:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0 20px var(--glow-color);
 }
 
 .btn-action {
