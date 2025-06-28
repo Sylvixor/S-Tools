@@ -203,6 +203,7 @@ body {
     letter-spacing: 0.1em;
     position: relative;
     overflow: hidden;
+    flex: 1;
 }
 
 .tab:hover {
@@ -218,26 +219,26 @@ body {
 
 .tab-content {
     display: none;
-    /* Removed default animation here, will be controlled by JS */
+    width: 100%;
 }
 
 .tab-content.active {
     display: block;
-    animation: slideIn 0.5s ease-out forwards;
+    animation: fadeInUp 0.3s ease-out forwards;
 }
 
-.tab-content.slide-out {
-    animation: slideOut 0.5s ease-in forwards;
+.tab-content.fade-out-down {
+    animation: fadeOutDown 0.3s ease-in forwards;
 }
 
-@keyframes slideIn {
-    from { opacity: 0; transform: translateX(50px); }
-    to { opacity: 1; transform: translateX(0); }
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes slideOut {
-    from { opacity: 1; transform: translateX(0); }
-    to { opacity: 0; transform: translateX(-50px); }
+@keyframes fadeOutDown {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(20px); }
 }
 
 .upload-zone {
@@ -492,8 +493,6 @@ body {
 }
 
 .encode-section {
-    max-width: 800px;
-    margin: 0 auto;
 }
 
 .textarea-container {
@@ -605,8 +604,6 @@ body {
 }
 
 .color-tools {
-    max-width: 800px; /* Increased max-width for the new layout */
-    margin: 0 auto;
     display: flex; /* Use flexbox for main layout */
     flex-direction: column; /* Stack elements vertically */
     gap: 20px; /* Space between sections */
@@ -783,8 +780,8 @@ body {
 }
 
 .pdf-section {
-    max-width: 800px;
-    margin: 0 auto;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .pdf-tools {
@@ -815,8 +812,6 @@ body {
 }
 
 .converter-section {
-    max-width: 800px;
-    margin: 0 auto;
 }
 
 .converter-grid {

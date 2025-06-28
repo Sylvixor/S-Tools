@@ -27,11 +27,7 @@ class Converter {
                 } else if (clickedTab === 'converter') {
                     this.setupConverter();
                 } else {
-                    const paletteContainer = document.getElementById('paletteContainer');
-                    if (paletteContainer) {
-                        paletteContainer.style.display = 'none';
-                        
-                    }
+                    // Handled by switchTab now
                 }
             });
         });
@@ -100,7 +96,7 @@ class Converter {
             });
         });
 
-        document.getElementById('convertUnitBtn').addEventListener('click', () => this.convertUnits());
+        
 
         // Add event listeners for unit selection changes
         document.getElementById('converterFromUnit').addEventListener('change', () => this.convertUnits());
@@ -171,16 +167,7 @@ class Converter {
                     kelvin: { toBase: (val) => val - 273.15, fromBase: (val) => val + 273.15 }
                 }
             },
-            currency: {
-                base: 'USD',
-                conversions: {
-                    // Placeholder: Real currency conversion requires an external API
-                    USD: 1,
-                    EUR: 0.92, // Example rate
-                    GBP: 0.79, // Example rate
-                    JPY: 158.20 // Example rate
-                }
-            }
+            
         };
 
         // Default to time conversion
@@ -268,21 +255,45 @@ class Converter {
     switchTab(tabName) {
         const currentActiveTabContent = document.querySelector('.tab-content.active');
         const newTabContent = document.getElementById(tabName);
+        const currentActiveTabButton = document.querySelector('.tab.active');
+        const paletteContainer = document.getElementById('paletteContainer');
+
+        // If the clicked tab is already active, do nothing
+        if (currentActiveTabButton && currentActiveTabButton.dataset.tab === tabName) {
+            return;
+        }
 
         // Update tab buttons
-        document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+        if (currentActiveTabButton) {
+            currentActiveTabButton.classList.remove('active');
+        }
         document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
 
         if (currentActiveTabContent) {
-            currentActiveTabContent.classList.add('slide-out');
-            currentActiveTabContent.addEventListener('animationend', () => {
-                currentActiveTabContent.classList.remove('active', 'slide-out');
-                newTabContent.classList.add('active');
-                // Handle palette visibility for the new tab
+            // If switching FROM the colors tab, apply fade-out to paletteContainer
+            if (currentActiveTabContent.id === 'colors' && paletteContainer) {
+                paletteContainer.classList.add('fade-out-down');
+                paletteContainer.classList.remove('fade-in-up');
+            }
+
+            currentActiveTabContent.classList.add('fade-out-down');
+            currentActiveTabContent.classList.remove('fade-in-up'); // Ensure old animation is removed
+            
+            // Use setTimeout to control the animation and class removal
+            setTimeout(() => {
+                currentActiveTabContent.classList.remove('active', 'fade-out-down');
+                // If we switched FROM the colors tab, hide and clear the palette after its fade-out
+                if (currentActiveTabContent.id === 'colors' && paletteContainer) {
+                    paletteContainer.classList.remove('fade-out-down');
+                    paletteContainer.style.display = 'none';
+                    paletteContainer.innerHTML = ''; // Clear content after fade out
+                }
+
+                newTabContent.classList.add('active', 'fade-in-up');
                 this.handleTabContentVisibility(tabName);
-            }, { once: true });
+            }, 300); // Match this duration to the CSS animation duration
         } else {
-            newTabContent.classList.add('active');
+            newTabContent.classList.add('active', 'fade-in-up');
             this.handleTabContentVisibility(tabName);
         }
 
@@ -293,6 +304,8 @@ class Converter {
         const paletteContainer = document.getElementById('paletteContainer');
         if (tabName === 'colors') {
             paletteContainer.style.display = 'block';
+            paletteContainer.classList.add('fade-in-up'); // Add fade-in for palette
+            paletteContainer.classList.remove('fade-out-down'); // Ensure old animation is removed
             const colorPicker = document.getElementById('colorPicker');
             if (colorPicker) {
                 this.handleColorChange(colorPicker.value);
@@ -300,8 +313,8 @@ class Converter {
         } else if (tabName === 'converter') {
             this.setupConverter();
         } else {
-            paletteContainer.style.display = 'none';
-            paletteContainer.innerHTML = '';
+            // No direct manipulation of paletteContainer.style.display here for non-color tabs
+            // It's handled in switchTab now.
         }
     }
 
