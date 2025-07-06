@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Syl's Tools</title>
+    <link rel="stylesheet" href="style.css">
+    <script defer src="https://dash.sylvixor.com/script.js" data-website-id="2cb83a85-0c11-496a-874f-9fe878425886"></script>
+</head>
+<body>
+    <div class="noise-overlay"></div>
+    <div class="scanlines"></div>
+    <div class="film-grain"></div>
+    
+    <div class="container">
+        <header class="header">
+            <div class="glitch-text" data-text="SYL's TOOLS">
+                <span>SYL's TOOLS</span>
+            </div>
+            <div class="subtitle">PRIVACY-FIRST • NO TRACKING • LOCAL PROCESSING ONLY</div>
+        </header>
+
+        <div class="main-interface">
+            <div class="tabs">
+                <button class="tab active" data-tab="files">FILE OPERATIONS</button>
+                <button class="tab" data-tab="converter">CONVERTER</button>
+                <button class="tab" data-tab="encode">ENCODE/DECODE</button>
+                <button class="tab" data-tab="colors">COLORS</button>
+            </div>
+
+            <div class="tab-content active" id="files">
+                <div class="upload-zone" id="uploadZone">
+                    <div class="upload-icon">⬆</div>
+                    <div class="upload-text">DROP FILES OR CLICK TO SELECT</div>
+                    <div class="upload-subtext">IMAGES • VIDEOS • DOCUMENTS</div>
+                    <input type="file" id="fileInput" multiple hidden>
+                </div>
+
+                <div class="file-list" id="fileList"></div>
+
+                <div class="conversion-panel" id="conversionPanel" style="display: none;">
+                    <div class="panel-title">CONVERSION OPTIONS</div>
+                    <div class="format-grid" id="formatGrid"></div>
+                    <div class="quality-controls" id="qualityControls" style="display: none;">
+                        <label>QUALITY: <span id="qualityValue">80</span>%</label>
+                        <input type="range" id="qualitySlider" min="10" max="100" value="80">
+                    </div>
+                    <button class="convert-btn" id="convertBtn">EXECUTE CONVERSION</button>
+                </div>
+            </div>
+
+            <div class="tab-content" id="converter">
+                <div class="converter-section">
+                    <div class="panel-title">UNIT CONVERTER</div>
+                    <div class="converter-category-select">
+                        <label for="converterCategory">CATEGORY:</label>
+                        <select id="converterCategory">
+                            <option value="time">Time</option>
+                            <option value="length">Length</option>
+                            <option value="weight">Weight</option>
+                            <option value="temperature">Temperature</option>
+                            
+                        </select>
+                    </div>
+                    <div class="converter-grid">
+                        <div class="converter-input-group">
+                            <input type="number" id="converterInput" placeholder="Enter value">
+                            <select id="converterFromUnit"></select>
+                        </div>
+                        <div class="converter-output-group">
+                            <input type="text" id="converterOutput" readonly placeholder="Result">
+                            <select id="converterToUnit"></select>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="encode">
+                <div class="encode-section">
+                    <div class="panel-title">TEXT ENCODER/DECODER</div>
+                    <div class="textarea-container">
+                        <textarea id="inputText" placeholder="INPUT DATA..."></textarea>
+                        <button class="copy-textarea-btn" data-target="inputText">
+                            <svg class="copy-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="encode-method-grid" id="encodeMethod">
+                        <button class="method-btn active" data-value="base64">BASE64</button>
+                        <button class="method-btn" data-value="hex">HEX</button>
+                        <button class="method-btn" data-value="sha1">SHA1</button>
+                        <button class="method-btn" data-value="sha256">SHA256</button>
+                        <button class="method-btn" data-value="url">URL</button>
+                        <button class="method-btn" data-value="binary">BINARY</button>
+                    </div>
+                    <div class="encode-actions">
+                        <button id="encodeBtn" class="btn btn-action">ENCODE</button>
+                        <button id="decodeBtn" class="btn btn-action">DECODE</button>
+                    </div>
+                    <div class="textarea-container">
+                        <textarea id="outputText" placeholder="OUTPUT WILL APPEAR HERE..." readonly></textarea>
+                        <button class="copy-textarea-btn" data-target="outputText">
+                            <svg class="copy-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="colors">
+                <div class="color-tools">
+                    <div class="panel-title">COLOR UTILITIES</div>
+                    <div class="color-main-section">
+                        <div class="color-picker-wrapper">
+                            <div id="customColorPicker" class="custom-color-picker" style="background-color: #ffffff;"></div>
+                            <input type="color" id="colorPicker" value="#ffffff" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; pointer-events: none;">
+                        </div>
+                        <div class="color-values-container">
+                            <div class="color-value">
+                                <label>HEX</label>
+                                <div class="color-input-group">
+                                    <input type="text" id="hexValue" value="#FFFFFF" readonly class="color-input-box">
+                                    <button class="copy-icon-btn" data-target="hexValue">
+                                        <svg class="copy-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="color-value">
+                                <label>RGB</label>
+                                <div class="color-input-group">
+                                    <input type="text" id="rgbValue" value="rgb(255, 255, 255)" readonly class="color-input-box">
+                                    <button class="copy-icon-btn" data-target="rgbValue">
+                                        <svg class="copy-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="color-value">
+                                <label>HSL</label>
+                                <div class="color-input-group">
+                                    <input type="text" id="hslValue" value="hsl(0, 0%, 100%)" readonly class="color-input-box">
+                                    <button class="copy-icon-btn" data-target="hslValue">
+                                        <svg class="copy-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="palette-container" id="paletteContainer">
+                        <div class="panel-title">GENERATED PALETTE</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="status-bar">
+            <div class="status-text" id="statusText">READY</div>
+            <div class="progress-bar" id="progressBar" style="display: none;">
+                <div class="progress-fill"></div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="/public/js/app.js"></script>
+</body>
+</html>
